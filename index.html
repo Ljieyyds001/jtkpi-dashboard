@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>集团品质关键岗位KPI达成看板</title>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Microsoft YaHei',sans-serif;background:#0f1923;color:#e0e8f0}
+.header{text-align:center;padding:6px 0;background:linear-gradient(135deg,#0a1628,#162a4a);border-bottom:2px solid #1e90ff}
+.header h1{font-size:20px;letter-spacing:3px;background:linear-gradient(90deg,#4fc3f7,#81d4fa,#4fc3f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header .sub{font-size:10px;color:#7eb8da;margin-top:1px}
+.main{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:calc(50vh - 24px) calc(50vh - 24px);gap:6px;padding:6px;height:calc(100vh - 42px)}
+.card{background:linear-gradient(145deg,#131f30,#1a2940);border:1px solid #1e3a5f;border-radius:8px;padding:8px;overflow:hidden;position:relative}
+.card-title{font-size:11px;font-weight:700;color:#4fc3f7;margin-bottom:4px;padding-bottom:3px;border-bottom:1px solid #1e3a5f}
+.ov-row{display:flex;gap:4px;margin-bottom:4px}
+.ov-item{flex:1;background:#1a2940;border-radius:5px;padding:3px;text-align:center}
+.ov-item .num{font-size:15px;font-weight:700;color:#4fc3f7}
+.ov-item .label{font-size:8px;color:#7eb8da}
+.grade-row{display:flex;gap:3px;margin-bottom:3px;flex-wrap:wrap}
+.grade-badge{padding:2px 6px;border-radius:10px;font-size:9px;font-weight:700;cursor:pointer;border:2px solid transparent}
+.grade-badge:hover,.grade-badge.active{transform:scale(1.05);box-shadow:0 0 8px rgba(30,144,255,.4)}
+.grade-s{background:#ff6b35;color:#fff}.grade-a{background:#4caf50;color:#fff}.grade-b{background:#2196f3;color:#fff}.grade-c{background:#ff9800;color:#fff}.grade-d{background:#f44336;color:#fff}
+table{width:100%;border-collapse:collapse;font-size:10px}
+th{background:#162a4a;color:#81d4fa;padding:3px;text-align:left;font-weight:600;position:sticky;top:0;z-index:1}
+td{padding:2px 3px;border-bottom:1px solid #1a2d45}
+tr:hover{background:rgba(30,144,255,.1)}
+.clickable{cursor:pointer;color:#4fc3f7;text-decoration:underline}.clickable:hover{color:#81d4fa}
+.scroll-wrap{overflow-y:auto}
+.scroll-wrap::-webkit-scrollbar{width:3px}
+.scroll-wrap::-webkit-scrollbar-thumb{background:#1e3a5f;border-radius:2px}
+.dept-filter{display:flex;gap:3px;margin-bottom:3px;flex-wrap:wrap}
+.dept-btn{padding:1px 6px;border-radius:8px;font-size:9px;background:#1a2d45;color:#7eb8da;border:1px solid #1e3a5f;cursor:pointer}
+.dept-btn:hover,.dept-btn.active{background:#1e90ff;color:#fff;border-color:#1e90ff}
+.rank-num{display:inline-flex;width:16px;height:16px;align-items:center;justify-content:center;border-radius:50%;font-size:8px;font-weight:700}
+.rank-1{background:#ff6b35;color:#fff}.rank-2{background:#ff9800;color:#fff}.rank-3{background:#ffc107;color:#333}
+.score-bar{height:4px;border-radius:2px;background:#1a2d45;margin-top:1px}
+.score-bar-fill{height:100%;border-radius:2px}
+.top-item{display:flex;align-items:center;gap:4px;padding:3px 5px;background:#1a2940;border-radius:5px;margin-bottom:2px;cursor:pointer;font-size:10px}
+.top-item:hover{background:#1e3a5f}
+.top-item .sc{font-weight:700;margin-left:auto}
+.modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.65);z-index:1000;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#131f30;border:1px solid #1e3a5f;border-radius:10px;padding:16px;width:900px;max-width:95vw;max-height:80vh;overflow-y:auto}
+.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.modal-header h3{color:#4fc3f7;font-size:15px}
+.modal-close{width:24px;height:24px;border-radius:50%;background:#1a2d45;border:1px solid #1e3a5f;color:#7eb8da;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:#f44336;color:#fff}
+.kpi-card{background:#1a2940;border:1px solid #1e3a5f;border-radius:6px;padding:8px 10px;margin-bottom:6px}
+.kpi-name{font-size:12px;font-weight:600}
+.kpi-meta{display:flex;gap:12px;margin-top:4px;font-size:10px;color:#7eb8da;flex-wrap:wrap}
+.kpi-bar{height:6px;background:#0f1923;border-radius:3px;margin-top:4px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:3px}
+#month-select{background:#1a2940;color:#4fc3f7;border:1px solid #1e3a5f;border-radius:4px;padding:1px 4px;font-size:10px;font-family:inherit;cursor:pointer;outline:none}
+#month-select:hover{border-color:#1e90ff}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>集团品质关键岗位 KPI 达成看板</h1>
+  <div class="sub">
+    <label for="month-select" style="cursor:pointer">2025年</label>
+    <select id="month-select" onchange="switchMonth(this.value)"></select>
+    <span> · 集团及各事业部关键岗位绩效总览 · 点击姓名/图表下钻个人指标详情</span>
+  </div>
+</div>
+<div class="main">
+  <div class="card">
+    <div class="card-title">集团总览 · 事业部得分</div>
+    <div id="ov-nums" class="ov-row"></div>
+    <div id="chart-dept" style="width:100%;height:calc(50vh - 100px)"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">SABCD 等级分布</div>
+    <div id="grade-badges" class="grade-row"></div>
+    <div id="chart-grade" style="width:100%;height:calc(50vh - 80px)"></div>
+  </div>
+  <div class="card">
+    <div class="card-title" style="color:#4caf50">🏆 最佳TOP3</div>
+    <div id="top3-list"></div>
+    <div class="card-title" style="color:#f44336;margin-top:3px">⚠ 最差TOP3</div>
+    <div id="bottom3-list"></div>
+    <div class="card-title" style="margin-top:3px">事业部雷达</div>
+    <div id="chart-radar" style="width:100%;height:calc(50vh - 190px)"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">个人得分分布（点击下钻）</div>
+    <div id="chart-scatter" style="width:100%;height:calc(50vh - 60px)"></div>
+  </div>
+  <div class="card" style="grid-column:span 2">
+    <div class="card-title">全员得分排名（点击姓名下钻）</div>
+    <div class="dept-filter" id="dept-filter"></div>
+    <div class="scroll-wrap" id="rank-scroll" style="height:calc(50vh - 80px)">
+      <table><thead><tr><th>排名</th><th>姓名</th><th>事业部</th><th>得分</th><th>等级</th><th style="width:30%">得分条</th></tr></thead>
+      <tbody id="rank-tbody"></tbody></table>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-header"><h3 id="modal-title">个人KPI详情</h3><button class="modal-close" onclick="closeModal()">×</button></div>
+    <div id="modal-score-info" style="margin-bottom:8px"></div>
+    <div id="modal-chart" style="width:100%;height:280px;margin-bottom:8px"></div>
+    <div id="modal-kpis"></div>
+  </div>
+</div>
+<script>
+var ALL_DATA={"2月":[{"id":1,"dept":"集团品质","name":"李勇","score":88.23,"kpis":[{"indicator":"管报税期净利润额（亿元）","weight":0.05,"actual":0.0,"rate":null,"score":0.0},{"indicator":"客户满意度（%）","weight":0.2,"actual":null,"rate":null,"score":20.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.2,"actual":0.63,"rate":1.26,"score":20.0},{"indicator":"FAT一次验收合格率（%）","weight":0.15,"actual":0.958,"rate":1.0084,"score":15.0},{"indicator":"不良质量成本（万元）","weight":0.15,"actual":259.0,"rate":1.3393,"score":15.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.815,"rate":0.8859,"score":8.86},{"indicator":"专业干部齐备合格人数（人）","weight":0.05,"actual":7.0,"rate":0.875,"score":4.38},{"indicator":"关键岗位齐备合格人数（人）","weight":0.05,"actual":3.0,"rate":1.0,"score":5.0},{"indicator":"人工成本占比值（%）","weight":0.05,"actual":0.0,"rate":null,"score":0.0}]},{"id":2,"dept":"集团品质","name":"黄泽志","score":88.86,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.25,"actual":0.63,"rate":1.26,"score":25.0},{"indicator":"不良质量成本 （万）","weight":0.1,"actual":259.0,"rate":1.3393,"score":10.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.815,"rate":0.8859,"score":8.86},{"indicator":"TR交付件齐备合格率（%）","weight":0.15,"actual":1.0,"rate":1.0,"score":15.0},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0}]},{"id":3,"dept":"集团品质","name":"吴楠","score":95.0,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.2,"actual":0.63,"rate":1.26,"score":20.0},{"indicator":"FAT一次合格率（%）","weight":0.3,"actual":0.958,"rate":1.0084,"score":30.0},{"indicator":"不良质量成本 （万）","weight":0.15,"actual":259.0,"rate":1.3393,"score":15.0},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0}]},{"id":4,"dept":"集团品质","name":"汪汝君","score":95.0,"kpis":[{"indicator":"客户满意度（%）","weight":0.3,"actual":null,"rate":null,"score":30.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.63,"rate":1.26,"score":15.0},{"indicator":"FAT一次合格率（%）","weight":0.15,"actual":0.958,"rate":1.0084,"score":15.0},{"indicator":"不良质量成本 （万）","weight":0.15,"actual":259.0,"rate":1.3393,"score":15.0},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0}]},{"id":5,"dept":"集团品质","name":"宋建军","score":93.29,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.63,"rate":1.26,"score":15.0},{"indicator":"不良质量成本 （万）（集团指标）","weight":0.3,"actual":259.0,"rate":1.3393,"score":30.0},{"indicator":"来料合格率（%）","weight":0.15,"actual":0.815,"rate":0.8859,"score":13.29},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0},{"indicator":"FAT一次合格率（%）","weight":0.05,"actual":0.958,"rate":1.0084,"score":5.0}]},{"id":8,"dept":"光伏品质","name":"马松武","score":88.55,"kpis":[{"indicator":"管报税期净利润额（亿元）","weight":0.05,"actual":0.0,"rate":null,"score":0.0},{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.757,"rate":1.2617,"score":15.0},{"indicator":"不良质量成本（万元）","weight":0.2,"actual":251.0,"rate":1.1981,"score":20.0},{"indicator":"FAT一次验收合格率（%）","weight":0.2,"actual":0.9541,"rate":1.0043,"score":20.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.812,"rate":0.8547,"score":8.55},{"indicator":"体系成熟度评价 （分）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"核心关键岗位齐备合格人数（人）","weight":0.05,"actual":4.0,"rate":1.0,"score":5.0},{"indicator":"人工成本占比值（%）","weight":0.05,"actual":0.0,"rate":null,"score":0.0}]},{"id":9,"dept":"光伏品质","name":"徐艺洋","score":88.55,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.25,"actual":0.757,"rate":1.2617,"score":25.0},{"indicator":"不良质量成本（万元）","weight":0.1,"actual":251.0,"rate":1.1981,"score":10.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.812,"rate":0.8547,"score":8.55},{"indicator":"TR交付件齐备合格率（%）","weight":0.15,"actual":1.0,"rate":1.0,"score":15.0},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0}]},{"id":10,"dept":"光伏品质","name":"卓恩达","score":83.55,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"FAT一次合格率（%）","weight":0.1,"actual":0.956,"rate":1.0063,"score":10.0},{"indicator":"不良质量成本（万元）","weight":0.2,"actual":251.0,"rate":1.1981,"score":20.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.812,"rate":0.8547,"score":8.55},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0},{"indicator":"TR交付件齐备合格率（%）","weight":0.15,"actual":1.0,"rate":1.0,"score":15.0},{"indicator":"研发项目财务成功率","weight":0.1,"actual":0.0,"rate":null,"score":0.0}]},{"id":11,"dept":"光伏品质","name":"王理想","score":92.82,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.757,"rate":1.2617,"score":15.0},{"indicator":"不良质量成本（万元）(光伏)","weight":0.3,"actual":251.0,"rate":1.1981,"score":30.0},{"indicator":"来料合格率（%）","weight":0.15,"actual":0.812,"rate":0.8547,"score":12.82},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0},{"indicator":"FAT一次合格率（%）","weight":0.05,"actual":0.956,"rate":1.0063,"score":5.0}]},{"id":12,"dept":"光伏品质","name":"王瓒","score":95.0,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.2,"actual":0.757,"rate":1.2617,"score":20.0},{"indicator":"FAT一次合格率（%）","weight":0.3,"actual":0.956,"rate":1.0063,"score":30.0},{"indicator":"不良质量成本 （万）（售后工时损失）","weight":0.15,"actual":6.9,"rate":1.885,"score":15.0},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0}]},{"id":13,"dept":"光伏品质","name":"汪振宇","score":95.0,"kpis":[{"indicator":"客户满意度（%）","weight":0.3,"actual":null,"rate":null,"score":30.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.757,"rate":1.2617,"score":15.0},{"indicator":"FAT一次合格率（%）","weight":0.15,"actual":0.956,"rate":1.0063,"score":15.0},{"indicator":"不良质量成本（万元）（光伏不良质量成本）","weight":0.15,"actual":251.0,"rate":1.1981,"score":15.0},{"indicator":"体系成熟度评价 （分）","weight":0.2,"actual":null,"rate":null,"score":20.0}]},{"id":14,"dept":"智造品质","name":"董志生","score":85.33,"kpis":[{"indicator":"管报税期净利润额（亿元）","weight":0.05,"actual":0.8499,"rate":null,"score":0.0},{"indicator":"客户满意度（%）","weight":0.1,"actual":null,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.38,"rate":2.5333,"score":15.0},{"indicator":"不良质量成本（万元）","weight":0.2,"actual":2.7,"rate":1.9386,"score":20.0},{"indicator":"FAT一次验收合格率（%）","weight":0.2,"actual":0.96,"rate":1.0105,"score":20.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.986,"rate":1.0105,"score":10.0},{"indicator":"核心关键岗位齐备合格人数（人）","weight":0.05,"actual":4.0,"rate":1.0,"score":5.0},{"indicator":"人工成本占比值（%）","weight":0.05,"actual":null,"rate":null,"score":0.0},{"indicator":"推动公司重点CI专项落地","weight":0.1,"actual":0.08,"rate":0.5333,"score":5.33}]},{"id":15,"dept":"智造品质","name":"董方","score":90.0,"kpis":[{"indicator":"不良质量成本 （万）","weight":0.1,"actual":2.7,"rate":1.9386,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.25,"actual":0.38,"rate":2.5333,"score":25.0},{"indicator":"客户满意度（%）","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"来料批次合格率（%）","weight":0.1,"actual":0.986,"rate":1.001,"score":10.0},{"indicator":"TR交付件齐备合格率","weight":0.15,"actual":1.0,"rate":1.0,"score":15.0},{"indicator":"体系成熟度/稽核评分（%）","weight":0.2,"actual":0.0,"rate":null,"score":20.0}]},{"id":16,"dept":"智造品质","name":"刘亚洲","score":85.0,"kpis":[{"indicator":"客户满意度（%）","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"FAT一次合格率(%)","weight":0.1,"actual":0.96,"rate":1.0105,"score":10.0},{"indicator":"不良质量成本 （万）","weight":0.2,"actual":2.7,"rate":1.9386,"score":20.0},{"indicator":"来料批次合格率","weight":0.1,"actual":0.986,"rate":1.001,"score":10.0},{"indicator":"TR评审交付件齐备合格率（次）","weight":0.15,"actual":1.0,"rate":1.0,"score":15.0},{"indicator":"体系成熟度/稽核评分（%）","weight":0.2,"actual":1.0,"rate":1.0,"score":20.0},{"indicator":"研发项目财务成功率","weight":0.1,"actual":0.0,"rate":null,"score":0.0}]},{"id":17,"dept":"智造品质","name":"张东东","score":90.0,"kpis":[{"indicator":"客户满意度","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率（%）","weight":0.15,"actual":0.38,"rate":2.5333,"score":15.0},{"indicator":"不良质量成本（内部+外部）（万元）","weight":0.3,"actual":2.7,"rate":1.9386,"score":30.0},{"indicator":"来料批次合格率","weight":0.15,"actual":0.986,"rate":1.001,"score":15.0},{"indicator":"体系成熟度/稽核评分（%）","weight":0.2,"actual":0.0,"rate":null,"score":20.0}]},{"id":18,"dept":"智造品质","name":"葛修山","score":80.0,"kpis":[{"indicator":"客户满意度","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率（%）","weight":0.2,"actual":0.38,"rate":2.5333,"score":20.0},{"indicator":"FAT一次合格率(%)","weight":0.3,"actual":0.96,"rate":1.0105,"score":30.0},{"indicator":"不良质量成本 （万）","weight":0.15,"actual":28.0,"rate":null,"score":0.0},{"indicator":"体系成熟度/稽核评分(%)","weight":0.2,"actual":0.0,"rate":null,"score":20.0}]},{"id":19,"dept":"智造品质","name":"段建超","score":95.0,"kpis":[{"indicator":"客户满意度提升率(%)","weight":0.3,"actual":0.0,"rate":null,"score":30.0},{"indicator":"关键物料追溯闭环覆盖率(%)","weight":0.15,"actual":0.38,"rate":2.5333,"score":15.0},{"indicator":"FAT一次验收合格率","weight":0.15,"actual":0.96,"rate":1.0105,"score":15.0},{"indicator":"不良质量成本(万)","weight":0.15,"actual":2.7,"rate":1.9386,"score":15.0},{"indicator":"体系成熟度/稽核评分(%)","weight":0.2,"actual":0.0,"rate":null,"score":20.0}]},{"id":20,"dept":"特材品质","name":"丁建阳","score":89.0,"kpis":[{"indicator":"管报税期净利润额（亿）","weight":0.05,"actual":31.0,"rate":1.0,"score":5.0},{"indicator":"不良质量成本（万元）","weight":0.2,"actual":5.0,"rate":1.8571,"score":20.0},{"indicator":"体系成熟度/稽核评分（%）","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率 （%）","weight":0.15,"actual":0.3,"rate":0.6,"score":9.0},{"indicator":"热场一次直通率","weight":0.1,"actual":0.9903,"rate":1.0105,"score":10.0},{"indicator":"石英一次直通率","weight":0.2,"actual":0.0,"rate":null,"score":20.0},{"indicator":"来料合格率（%）","weight":0.1,"actual":0.9951,"rate":1.0475,"score":10.0},{"indicator":"关键岗位齐备合格人数（人）","weight":0.05,"actual":2.0,"rate":1.0,"score":5.0},{"indicator":"人工成本占比值（%）","weight":0.05,"actual":0.0,"rate":null,"score":0.0}]},{"id":21,"dept":"特材品质","name":"刘家栋","score":67.0,"kpis":[{"indicator":"管报税期净利润额（万元）","weight":0.05,"actual":31.0,"rate":1.0,"score":5.0},{"indicator":"热场来料检验合格率","weight":0.1,"actual":0.9903,"rate":1.0003,"score":10.0},{"indicator":"石英来料检验合格率","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"原材料上线不良率","weight":0.1,"actual":0.9951,"rate":1.0475,"score":10.0},{"indicator":"质量索赔达成率","weight":0.15,"actual":0.0,"rate":null,"score":0.0},{"indicator":"体系成熟度","weight":0.2,"actual":0.0,"rate":null,"score":20.0},{"indicator":"关键物料追溯闭环覆盖率","weight":0.2,"actual":0.3,"rate":0.6,"score":12.0}]},{"id":22,"dept":"特材品质","name":"杜庆华","score":82.0,"kpis":[{"indicator":"管报税期净利润额(万)","weight":0.05,"actual":31.0,"rate":1.0,"score":5.0},{"indicator":"体系成熟度/稽核评分（%）","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"不良质量成本 （万）","weight":0.15,"actual":5.0,"rate":1.8571,"score":15.0},{"indicator":"热场一次直通率","weight":0.1,"actual":0.9903,"rate":1.0105,"score":10.0},{"indicator":"量产批准前设计问题关闭率","weight":0.1,"actual":1.0,"rate":1.0526,"score":10.0},{"indicator":"售后问题及时关闭率","weight":0.1,"actual":1.0,"rate":1.0101,"score":10.0},{"indicator":"热场、石英产品数据准确性","weight":0.1,"actual":1.0,"rate":1.0101,"score":10.0},{"indicator":"关键物料追溯闭环覆盖率（%）","weight":0.2,"actual":0.3,"rate":0.6,"score":12.0}]},{"id":23,"dept":"海外品质","name":"李鹏鲲","score":97.0,"kpis":[{"indicator":"客户满意度提升-海外项目客诉闭环率100%","weight":0.15,"actual":0.8,"rate":0.8,"score":12.0},{"indicator":"客户满意度提升-海外产品安全和合规性投诉次数","weight":0.15,"actual":0.0,"rate":null,"score":15.0},{"indicator":"FAT一次合格率（海外项目，含主机、自动化与第三方设备）","weight":0.2,"actual":0.959,"rate":1.0095,"score":20.0},{"indicator":"不良质量成本 （万）（海外项目）","weight":0.25,"actual":0.611,"rate":1.222,"score":25.0},{"indicator":"体系成熟度-建立海外质量管理体系","weight":0.1,"actual":0.0,"rate":null,"score":10.0},{"indicator":"海外工厂品质团队关键岗位齐备合格人数比例","weight":0.15,"actual":1.0,"rate":1.0,"score":15.0}]},{"id":24,"dept":"固睿品质","name":"苗寒烁","score":79.77,"kpis":[{"indicator":"问题解决率","weight":0.1,"actual":0.8797,"rate":0.9774,"score":9.77},{"indicator":"三体系建立项目完成率","weight":0.3,"actual":1.0,"rate":1.1111,"score":30.0},{"indicator":"来料质量合格率","weight":0.2,"actual":0.9955,"rate":1.0158,"score":20.0},{"indicator":"制程质量合格率","weight":0.2,"actual":0.0,"rate":null,"score":20.0}]}]};
+// ========== 多月份支持 ==========
+// ALL_DATA 格式: {"2月": [...], "3月": [...]} 或兼容旧格式 [...]
+var MONTH_DATA;
+if (Array.isArray(ALL_DATA)) {
+  MONTH_DATA = {"2月": ALL_DATA};
+} else {
+  MONTH_DATA = ALL_DATA;
+}
+var MONTHS = Object.keys(MONTH_DATA);
+var DATA = [];
+
+// 初始化月份下拉
+(function initMonthSelect() {
+  var sel = document.getElementById('month-select');
+  MONTHS.forEach(function(m) {
+    var opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = m;
+    sel.appendChild(opt);
+  });
+  // 默认选最新月份（最后一个）
+  sel.value = MONTHS[MONTHS.length - 1];
+})();
+
+// SABCD等级划分
+function getGrade(score) {
+  if (score >= 95) return 'S';
+  if (score >= 85) return 'A';
+  if (score >= 75) return 'B';
+  if (score >= 60) return 'C';
+  return 'D';
+}
+function gColor(g) {
+  return {S:'#ff6b35',A:'#4caf50',B:'#2196f3',C:'#ff9800',D:'#f44336'}[g]||'#999';
+}
+
+// ========== 图表实例 ==========
+var chartDept, chartGrade, chartRadar, chartScatter, modalChart;
+var activeGrade = null;
+var activeDept = null;
+
+// ========== 切换月份入口 ==========
+function switchMonth(month) {
+  DATA = MONTH_DATA[month] || [];
+  activeGrade = null;
+  activeDept = null;
+  renderAll();
+}
+
+// ========== 计算 + 渲染所有 ==========
+function renderAll() {
+  if (!DATA.length) return;
+
+  // 计算部门数据
+  var deptMap = {};
+  DATA.forEach(function(p) {
+    if (!deptMap[p.dept]) deptMap[p.dept] = [];
+    deptMap[p.dept].push(p);
+  });
+  var deptNames = Object.keys(deptMap);
+  var deptAvg = {};
+  deptNames.forEach(function(d) {
+    var arr = deptMap[d];
+    deptAvg[d] = +(arr.reduce(function(s,p){return s+p.score},0) / arr.length).toFixed(1);
+  });
+
+  var sorted = DATA.slice().sort(function(a,b){return b.score - a.score});
+  var totalAvg = +(DATA.reduce(function(s,p){return s+p.score},0) / DATA.length).toFixed(1);
+  var maxScore = sorted[0].score.toFixed(1);
+  var minScore = sorted[sorted.length-1].score.toFixed(1);
+
+  var gradeCount = {S:0,A:0,B:0,C:0,D:0};
+  var gradePersons = {S:[],A:[],B:[],C:[],D:[]};
+  DATA.forEach(function(p) {
+    var g = getGrade(p.score);
+    gradeCount[g]++;
+    gradePersons[g].push(p);
+  });
+
+  // ========== 总览数字 ==========
+  document.getElementById('ov-nums').innerHTML =
+    '<div class="ov-item"><div class="num">'+DATA.length+'</div><div class="label">考核人数</div></div>'+
+    '<div class="ov-item"><div class="num">'+deptNames.length+'</div><div class="label">事业部</div></div>'+
+    '<div class="ov-item"><div class="num">'+totalAvg+'</div><div class="label">集团均分</div></div>'+
+    '<div class="ov-item"><div class="num">'+maxScore+'</div><div class="label">最高分</div></div>'+
+    '<div class="ov-item"><div class="num">'+minScore+'</div><div class="label">最低分</div></div>';
+
+  // ========== 部门柱状图 ==========
+  if (!chartDept) {
+    chartDept = echarts.init(document.getElementById('chart-dept'));
+    chartDept.on('click', function(p){filterByDept(deptNames[p.dataIndex])});
+  }
+  chartDept.setOption({
+    tooltip:{trigger:'axis',backgroundColor:'#1a2940',borderColor:'#1e3a5f',textStyle:{color:'#e0e8f0',fontSize:11}},
+    grid:{left:50,right:10,top:10,bottom:24},
+    xAxis:{type:'category',data:deptNames.map(function(d){return d.replace('品质','')}),axisLabel:{color:'#7eb8da',fontSize:10},axisLine:{lineStyle:{color:'#1e3a5f'}}},
+    yAxis:{type:'value',min:0,max:100,axisLabel:{color:'#7eb8da',fontSize:10},splitLine:{lineStyle:{color:'#1a2d45'}}},
+    series:[{type:'bar',barWidth:24,
+      data:deptNames.map(function(d){return{value:deptAvg[d],itemStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'#4fc3f7'},{offset:1,color:'#1e90ff'}])}}}),
+      label:{show:true,position:'top',color:'#4fc3f7',fontSize:10,formatter:function(p){return p.value.toFixed(1)}}
+    }]
+  }, true);
+
+  // ========== SABCD 等级 ==========
+  var grades = ['S','A','B','C','D'];
+  var gradeLabels = {S:'S(≥95)',A:'A(85-94)',B:'B(75-84)',C:'C(60-74)',D:'D(<60)'};
+
+  function renderGradeBadges() {
+    document.getElementById('grade-badges').innerHTML = grades.map(function(g) {
+      return '<div class="grade-badge grade-'+g.toLowerCase()+(activeGrade===g?' active':'')+'" onclick="toggleGrade(\''+g+'\')">'+gradeLabels[g]+':'+gradeCount[g]+'人</div>';
+    }).join('');
+  }
+  renderGradeBadges();
+
+  // toggleGrade / filterByDept 需要闭包访问
+  window.toggleGrade = function(g) {
+    activeGrade = activeGrade===g ? null : g;
+    renderGradeBadges();
+    renderRankTable();
+  };
+
+  if (!chartGrade) {
+    chartGrade = echarts.init(document.getElementById('chart-grade'));
+    chartGrade.on('click', function(p){window.toggleGrade(p.name.replace('级',''))});
+  }
+  chartGrade.setOption({
+    tooltip:{trigger:'item',backgroundColor:'#1a2940',borderColor:'#1e3a5f',textStyle:{color:'#e0e8f0'}},
+    series:[{type:'pie',radius:['35%','65%'],center:['50%','50%'],
+      label:{color:'#e0e8f0',fontSize:10,formatter:'{b}:{c}人'},
+      data:grades.map(function(g){return{name:g+'级',value:gradeCount[g],itemStyle:{color:gColor(g)}}})
+    }]
+  }, true);
+
+  // ========== TOP3 / BOTTOM3 ==========
+  var medals = ['\ud83e\udd47','\ud83e\udd48','\ud83e\udd49'];
+  function renderTop3(id, list, color) {
+    document.getElementById(id).innerHTML = list.map(function(p,i) {
+      return '<div class="top-item" onclick="openModal('+p.id+')"><span class="medal">'+medals[i]+'</span><span>'+p.name+'</span><span style="font-size:10px;color:#7eb8da">'+p.dept.replace('品质','')+'</span><span class="sc" style="color:'+color+'">'+p.score.toFixed(1)+'</span></div>';
+    }).join('');
+  }
+  renderTop3('top3-list', sorted.slice(0,3), '#4caf50');
+  renderTop3('bottom3-list', sorted.slice(-3).reverse(), '#f44336');
+
+  // ========== 雷达图 ==========
+  if (!chartRadar) chartRadar = echarts.init(document.getElementById('chart-radar'));
+  chartRadar.setOption({
+    tooltip:{backgroundColor:'#1a2940',borderColor:'#1e3a5f',textStyle:{color:'#e0e8f0'}},
+    radar:{
+      indicator:deptNames.map(function(d){return{name:d.replace('品质',''),max:100}}),
+      shape:'polygon',radius:'65%',
+      axisName:{color:'#7eb8da',fontSize:9},
+      splitArea:{areaStyle:{color:['rgba(30,144,255,.05)','rgba(30,144,255,.1)']}},
+      splitLine:{lineStyle:{color:'#1e3a5f'}},axisLine:{lineStyle:{color:'#1e3a5f'}}
+    },
+    series:[{type:'radar',
+      data:[{value:deptNames.map(function(d){return deptAvg[d]}),name:'事业部均分',
+        areaStyle:{color:'rgba(79,195,247,.2)'},lineStyle:{color:'#4fc3f7'},itemStyle:{color:'#4fc3f7'}}]
+    }]
+  }, true);
+
+  // ========== 散点图 ==========
+  if (!chartScatter) {
+    chartScatter = echarts.init(document.getElementById('chart-scatter'));
+    chartScatter.on('click', function(p){if(p.data&&p.data[2])window.openModal(p.data[2])});
+  }
+  var scatterData = DATA.map(function(p,i){return [i, p.score, p.id, p.name, p.dept]});
+  chartScatter.setOption({
+    tooltip:{backgroundColor:'#1a2940',borderColor:'#1e3a5f',textStyle:{color:'#e0e8f0',fontSize:11},
+      formatter:function(p){return p.data[3]+'('+p.data[4].replace('品质','')+')<br>得分:'+p.data[1].toFixed(1)}},
+    grid:{left:40,right:10,top:10,bottom:30},
+    xAxis:{type:'value',show:false,min:0,max:DATA.length-1},
+    yAxis:{type:'value',min:0,max:100,axisLabel:{color:'#7eb8da',fontSize:10},splitLine:{lineStyle:{color:'#1a2d45'}}},
+    series:[{type:'scatter',symbolSize:10,
+      data:scatterData,
+      itemStyle:{color:function(p){var s=p.data[1];return s>=95?'#ff6b35':s>=85?'#4caf50':s>=75?'#2196f3':s>=60?'#ff9800':'#f44336'}}
+    }]
+  }, true);
+
+  // ========== 排名表 ==========
+  // 部门筛选按钮
+  document.getElementById('dept-filter').innerHTML =
+    '<div class="dept-btn'+(activeDept===null?' active':'')+'" onclick="filterByDept(null)">全部</div>'+
+    deptNames.map(function(d){
+      return '<div class="dept-btn'+(activeDept===d?' active':'')+'" onclick="filterByDept(\''+d+'\')">'+d.replace('品质','')+'</div>';
+    }).join('');
+
+  window.filterByDept = function(d) {
+    activeDept = activeDept===d ? null : d;
+    document.getElementById('dept-filter').innerHTML =
+      '<div class="dept-btn'+(activeDept===null?' active':'')+'" onclick="filterByDept(null)">全部</div>'+
+      deptNames.map(function(dd){
+        return '<div class="dept-btn'+(activeDept===dd?' active':'')+'" onclick="filterByDept(\''+dd+'\')">'+dd.replace('品质','')+'</div>';
+      }).join('');
+    renderRankTable();
+  };
+
+  function renderRankTable() {
+    var list = sorted;
+    if (activeDept) list = list.filter(function(p){return p.dept===activeDept});
+    if (activeGrade) list = list.filter(function(p){return getGrade(p.score)===activeGrade});
+    var html = '';
+    list.forEach(function(p, i) {
+      var rank = i + 1;
+      var g = getGrade(p.score);
+      var pct = p.score;
+      var barColor = gColor(g);
+      var rankCls = rank <= 3 ? ' rank-'+rank : '';
+      html += '<tr><td><span class="rank-num'+rankCls+'">'+rank+'</span></td>'+
+        '<td class="clickable" onclick="openModal('+p.id+')">'+p.name+'</td>'+
+        '<td>'+p.dept.replace('品质','')+'</td>'+
+        '<td style="font-weight:600">'+p.score.toFixed(1)+'</td>'+
+        '<td><span class="grade-badge grade-'+g.toLowerCase()+'" style="font-size:8px;padding:1px 4px">'+g+'</span></td>'+
+        '<td><div class="score-bar"><div class="score-bar-fill" style="width:'+pct+'%;background:'+barColor+'"></div></div></td></tr>';
+    });
+    document.getElementById('rank-tbody').innerHTML = html;
+  }
+  renderRankTable();
+
+  // ========== 个人详情弹窗 ==========
+  window.openModal = function(id) {
+    var p = DATA.find(function(x){return x.id===id});
+    if (!p) return;
+    var g = getGrade(p.score);
+    document.getElementById('modal-title').textContent = p.name + ' · ' + p.dept + ' · 个人KPI详情';
+    document.getElementById('modal-score-info').innerHTML =
+      '<span style="font-size:22px;font-weight:700;color:'+gColor(g)+'">'+p.score.toFixed(1)+'</span>'+
+      '<span style="font-size:12px;color:#7eb8da;margin-left:6px">'+g+'级</span>';
+
+    // 隐藏图表区域，用表格替代
+    document.getElementById('modal-chart').style.display = 'none';
+
+    document.getElementById('modal-kpis').innerHTML =
+      '<table style="width:100%;border-collapse:collapse;font-size:11px">' +
+      '<thead><tr>' +
+      '<th style="background:#162a4a;color:#81d4fa;padding:6px 8px;text-align:left;white-space:nowrap">指标</th>' +
+      '<th style="background:#162a4a;color:#81d4fa;padding:6px 8px;text-align:center;width:60px">权重</th>' +
+      '<th style="background:#162a4a;color:#81d4fa;padding:6px 8px;text-align:center;width:70px">实际值</th>' +
+      '<th style="background:#162a4a;color:#81d4fa;padding:6px 8px;text-align:center;width:70px">达成率</th>' +
+      '<th style="background:#162a4a;color:#81d4fa;padding:6px 8px;text-align:center;width:80px">得分</th>' +
+      '<th style="background:#162a4a;color:#81d4fa;padding:6px 8px;text-align:left;width:120px">达成</th>' +
+      '</tr></thead><tbody>' +
+      p.kpis.map(function(k) {
+        var maxS = k.weight * 100;
+        var pct = maxS > 0 ? (k.score / maxS * 100) : 0;
+        var bc = pct >= 90 ? '#4caf50' : pct >= 70 ? '#2196f3' : pct >= 50 ? '#ff9800' : '#f44336';
+        return '<tr style="border-bottom:1px solid #1a2d45">' +
+          '<td style="padding:6px 8px;color:#e0e8f0">'+k.indicator+'</td>' +
+          '<td style="padding:6px 8px;text-align:center;color:#7eb8da">'+(k.weight*100).toFixed(1)+'%</td>' +
+          '<td style="padding:6px 8px;text-align:center;color:#7eb8da">'+(k.actual!==null?Number(k.actual).toFixed(1):'-')+'</td>' +
+          '<td style="padding:6px 8px;text-align:center;color:#7eb8da">'+(k.rate!==null?(k.rate*100).toFixed(1)+'%':'-')+'</td>' +
+          '<td style="padding:6px 8px;text-align:center;font-weight:700;color:'+bc+'">'+k.score.toFixed(1)+'/'+maxS.toFixed(1)+'</td>' +
+          '<td style="padding:6px 8px"><div style="height:6px;background:#0f1923;border-radius:3px;overflow:hidden"><div style="height:100%;width:'+Math.min(pct,100).toFixed(1)+'%;background:'+bc+';border-radius:3px"></div></div></td>' +
+          '</tr>';
+      }).join('') +
+      '</tbody></table>';
+
+    document.getElementById('modal').classList.add('show');
+  };
+
+  window.closeModal = function() {
+    document.getElementById('modal').classList.remove('show');
+  };
+}
+
+// ========== 初始化 ==========
+setTimeout(function() {
+  switchMonth(document.getElementById('month-select').value);
+}, 100);
+
+window.addEventListener('resize', function() {
+  if (chartDept) chartDept.resize();
+  if (chartGrade) chartGrade.resize();
+  if (chartRadar) chartRadar.resize();
+  if (chartScatter) chartScatter.resize();
+  if (modalChart) modalChart.resize();
+});
+
+</script>
+</body>
+</html>
