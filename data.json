@@ -207,56 +207,6 @@
     ]
   },
   {
-    "id": 5,
-    "dept": "集团品质",
-    "name": "宋建军",
-    "score": 93.29,
-    "kpis": [
-      {
-        "indicator": "客户满意度（%）",
-        "weight": 0.1,
-        "actual": null,
-        "rate": null,
-        "score": 10.0
-      },
-      {
-        "indicator": "关键物料追溯闭环覆盖率 （%）",
-        "weight": 0.15,
-        "actual": 0.63,
-        "rate": 1.26,
-        "score": 15.0
-      },
-      {
-        "indicator": "不良质量成本 （万）（集团指标）",
-        "weight": 0.3,
-        "actual": 259.0,
-        "rate": 1.3393,
-        "score": 30.0
-      },
-      {
-        "indicator": "来料合格率（%）",
-        "weight": 0.15,
-        "actual": 0.815,
-        "rate": 0.8859,
-        "score": 13.29
-      },
-      {
-        "indicator": "体系成熟度评价 （分）",
-        "weight": 0.2,
-        "actual": null,
-        "rate": null,
-        "score": 20.0
-      },
-      {
-        "indicator": "FAT一次合格率（%）",
-        "weight": 0.05,
-        "actual": 0.958,
-        "rate": 1.0084,
-        "score": 5.0
-      }
-    ]
-  },
-  {
     "id": 6,
     "dept": "光伏品质",
     "name": "马松武",
